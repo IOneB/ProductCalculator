@@ -1,0 +1,113 @@
+﻿@model List<Product>
+
+<style>
+    table {
+        margin: 15px;
+    }
+
+    th, td {
+        border: solid black 1px;
+    }
+</style>
+
+<br />
+<input type="button" name="add" value="+" class="add" />
+
+<table>
+    <thead>
+        <tr>
+            <th>Наименование</th>
+            <th>Стоимость</th>
+            <th>Количество</th>
+            <th>Цена</th>
+            <th><input type="button" value="X" id="clear"/></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td><input type="text" class="name" value="@product.Name" /></td>
+                <td><input type="number" class="price" value="@(product.Price?.ToString().Replace(",", "."))" /></td>
+                <td><input type="number" class="count" value="@product.Count?.ToString().Replace(",", ".")" /></td>
+                <td><input type="number" class="sum" value="@((product.Price * product.Count)?.ToString().Replace(",", "."))" readonly /></td>
+                <td><input type="button" value="X" /></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<span>Сумма:</span>
+<input type="text" name="total" id="total" value="@Model.Sum(x => x.Price * x.Count)?.ToString().Replace(",", ".")" readonly />
+<input type="button" name="add" value="+" class="add" />
+
+@section Scripts
+{
+    <script>
+        function notNan(x) {
+            return Number.isNaN(x) ? 0 : x;
+        }
+
+        $(function () {
+            $('table input').on('input', input);
+            $('tbody input[type="button"]').on('click', remove);
+
+            $('#clear').click(function () {
+                $('tbody').empty();
+                save();
+            });
+
+            $('.add').click(add);
+        });
+
+        function add() {
+            $('tbody').append(`
+    <tr>
+                    <td><input type="text" class="name" value="" /></td>
+                    <td><input type="number" class="price" value="" /></td>
+                    <td><input type="number" class="count" value="1" /></td>
+                    <td><input type="number" class="sum" value="" readonly/></td>
+                    <td><input type="button" value="X"/></td>
+                </tr>`);
+            $('table input').off('input', input);
+            $('table input').on('input', input);
+            $('tbody input[type="button"]').off('click', remove);
+            $('tbody input[type="button"]').on('click', remove);
+
+            save();
+        }
+
+        function input() {
+            const tr = this.closest('tr');
+            const price = notNan(parseFloat($('.price', tr).val()) ?? 0);
+            const count = notNan(parseFloat($('.count', tr).val()) ?? 0);
+
+            $('.sum', tr).val((price * count).toFixed(2));
+
+            save();
+        }
+
+        function remove() {
+            $(this.closest('tr')).remove()
+
+            save();
+        }
+
+        function save() {
+            $('#total').val(Array.from($('.sum')).reduce((aggr, next) => aggr + notNan(parseFloat(next.value)), 0).toFixed(2));
+
+            const data = Array.from($('tbody tr')).map(x => {
+                return {
+                    name: $('.name', x).val(),
+                    price: $('.price', x).val().replace('.', ','),
+                    count: $('.count', x).val().replace('.', ','),
+                }
+            });
+
+            $.post({
+                url: '@Url.Action("Save", "Home")',
+                data: { products: data },
+            });
+        }
+    </script>
+}
