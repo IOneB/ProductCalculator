@@ -4,38 +4,51 @@
     table {
         margin: 15px;
     }
-
     th, td {
-        border: solid black 1px;
+        padding: .5rem !important;
+        width: 100%;
+    }
+    .count, .price, .name{
+        width:100%;
+    }
+
+    .sum{
+        width: 5rem;
+    }
+    .container-fluid{
+        font-size: smaller;
     }
 </style>
 
 <br />
 <input type="button" name="add" value="+" class="add" />
 
-<table>
-    <thead>
-        <tr>
-            <th>Наименование</th>
-            <th>Стоимость</th>
-            <th>Количество</th>
-            <th>Цена</th>
-            <th><input type="button" value="X" id="clear"/></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var product in Model)
-        {
+<div>
+    <table class="table">
+        <thead>
             <tr>
-                <td><input type="text" class="name" value="@product.Name" /></td>
-                <td><input type="number" class="price" value="@(product.Price?.ToString().Replace(",", "."))" /></td>
-                <td><input type="number" class="count" value="@product.Count?.ToString().Replace(",", ".")" /></td>
-                <td><input type="number" class="sum" value="@((product.Price * product.Count)?.ToString().Replace(",", "."))" readonly /></td>
-                <td><input type="button" value="X" /></td>
+                <th>Наименование</th>
+                <th>Стоимость</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th><input type="button" value="X" id="clear" /></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td><input type="text" class="name" value="@product.Name" /></td>
+                    <td><input type="number" class="price" value="@(product.Price?.ToString().Replace(",", "."))" /></td>
+                    <td><input type="number" class="count" value="@product.Count?.ToString().Replace(",", ".")" /></td>
+                    <td><input type="number" class="sum" value="@((product.Price * product.Count)?.ToString().Replace(",", "."))" readonly /></td>
+                    <td><input type="button" value="X" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
 
 <span>Сумма:</span>
 <input type="text" name="total" id="total" value="@Model.Sum(x => x.Price * x.Count)?.ToString().Replace(",", ".")" readonly />
